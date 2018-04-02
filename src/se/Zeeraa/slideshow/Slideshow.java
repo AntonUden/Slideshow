@@ -117,7 +117,6 @@ public class Slideshow {
 			if (folder.exists()) {
 				if (folder.isDirectory()) {
 					for (File f : folder.listFiles()) {
-						System.out.println(f.getAbsolutePath());
 						if (fileTypes.contains(getFileExtension(f))) {
 							System.out.println("Reading " + f.getAbsolutePath());
 							images.add(ImageIO.read(f));
