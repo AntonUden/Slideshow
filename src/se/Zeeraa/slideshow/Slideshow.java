@@ -1,5 +1,7 @@
 package se.Zeeraa.slideshow;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,7 +25,7 @@ public class Slideshow {
 	private Path p;
 
 	private File[] folderContent;
-	
+
 	private int imageIndex = 0;
 	private Timer nextTimer = new Timer(100, new ActionListener() {
 		@Override
@@ -31,11 +33,11 @@ public class Slideshow {
 			nextImage();
 		}
 	});
-	
+
 	private Timer updateTimer = new Timer(5000, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if(!Arrays.equals(folderContent, p.toFile().listFiles())) {
+			if (!Arrays.equals(folderContent, p.toFile().listFiles())) {
 				nextTimer.stop();
 				System.out.println("Update in image folder detected. Reloading files");
 				loadImages(p.toFile());
@@ -49,7 +51,7 @@ public class Slideshow {
 	}
 
 	public Slideshow(String[] args) {
-		if(!(args.length < 2 || args.length > 2)) {
+		if (!(args.length < 2 || args.length > 2)) {
 			try {
 				p = Paths.get(args[0]);
 				nextTimer.setDelay(Integer.parseInt(args[1]));
@@ -62,36 +64,43 @@ public class Slideshow {
 			System.err.println("Error. use java -jar Slideshow.jar <path> <delay>");
 			System.exit(0);
 		}
-		
+
 		fileTypes.clear();
 		for (String ext : ImageIO.getReaderFormatNames()) {
 			fileTypes.add(ext);
 		}
-		
+
 		loadImages(p.toFile());
 
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice vc = env.getDefaultScreenDevice();
+
 		frame.setUndecorated(true);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.add(imgP);
-		
+		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+
 		frame.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
 			}
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 			}
+
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 					System.out.println("Escape Pressed. Closing");
 					System.exit(0);
 				}
 			}
 		});
+
+		vc.setFullScreenWindow(frame);
 		
 		nextTimer.start();
 		updateTimer.start();
@@ -99,8 +108,8 @@ public class Slideshow {
 	}
 
 	public void nextImage() {
-		if(images.size() > 0) {
-			if(imageIndex >= images.size()) {
+		if (images.size() > 0) {
+			if (imageIndex >= images.size()) {
 				imageIndex = 0;
 			}
 			imgP.setImage(images.get(imageIndex));
@@ -109,7 +118,7 @@ public class Slideshow {
 			imgP.clearImage();
 		}
 	}
-	
+
 	public boolean loadImages(File folder) {
 		images.clear();
 		System.out.println("Loading images...");
