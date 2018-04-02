@@ -7,6 +7,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -19,25 +20,25 @@ public class Slideshow {
 	private ArrayList<String> fileTypes = new ArrayList<>();
 	private Path p;
 
-	private String folderHash = "";
+	private File[] folderContent;
 	
 	private int imageIndex = 0;
-	private Timer t = new Timer(100, new ActionListener() {
+	private Timer nextTimer = new Timer(100, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			nextImage();
 		}
 	});
 	
-	private Timer updateTimer = new Timer(5000, new ActionListener() {
+	private Timer updateTimer = new Timer(1000, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			t.stop();
-			if(!folderHash.equals(Hash.dirMD5(p.toString()))) {
+			if(!Arrays.equals(folderContent, p.toFile().listFiles())) {
+				nextTimer.stop();
 				System.out.println("Update in image folder detected. Reloading files");
 				loadImages(p.toFile());
+				nextTimer.start();
 			}
-			t.start();
 		}
 	});
 
@@ -49,7 +50,7 @@ public class Slideshow {
 		if(!(args.length < 2 || args.length > 2)) {
 			try {
 				p = Paths.get(args[0]);
-				t.setDelay(Integer.parseInt(args[1]));
+				nextTimer.setDelay(Integer.parseInt(args[1]));
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.err.println("Error. use java -jar Slideshow.jar <path> <delay>");
@@ -65,7 +66,7 @@ public class Slideshow {
 			fileTypes.add(ext);
 		}
 		
-		System.out.println(loadImages(p.toFile()));
+		loadImages(p.toFile());
 
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setUndecorated(true);
@@ -74,7 +75,7 @@ public class Slideshow {
 		frame.setLocationRelativeTo(null);
 		frame.add(imgP);
 		
-		t.start();
+		nextTimer.start();
 		updateTimer.start();
 		nextImage();
 	}
@@ -98,12 +99,13 @@ public class Slideshow {
 			if (folder.exists()) {
 				if (folder.isDirectory()) {
 					for (File f : folder.listFiles()) {
+						System.out.println(f.getAbsolutePath());
 						if (fileTypes.contains(getFileExtension(f))) {
 							System.out.println("Reading " + f.getAbsolutePath());
 							images.add(ImageIO.read(f));
 						}
 					}
-					folderHash = Hash.dirMD5(folder.toString());
+					folderContent = folder.listFiles();
 					System.out.println(images.size() + " Images loaded from " + folder.getPath());
 					return true;
 				} else {
