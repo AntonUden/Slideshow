@@ -3,6 +3,8 @@ package se.Zeeraa.slideshow;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +32,7 @@ public class Slideshow {
 		}
 	});
 	
-	private Timer updateTimer = new Timer(1000, new ActionListener() {
+	private Timer updateTimer = new Timer(5000, new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(!Arrays.equals(folderContent, p.toFile().listFiles())) {
@@ -74,6 +76,22 @@ public class Slideshow {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.add(imgP);
+		
+		frame.addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+					System.out.println("Escape Pressed. Closing");
+					System.exit(0);
+				}
+			}
+		});
 		
 		nextTimer.start();
 		updateTimer.start();
