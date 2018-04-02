@@ -1,5 +1,6 @@
 package se.Zeeraa.slideshow;
 
+import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.Timer;
 
 public class Slideshow {
@@ -55,6 +57,13 @@ public class Slideshow {
 			try {
 				p = Paths.get(args[0]);
 				nextTimer.setDelay(Integer.parseInt(args[1]));
+				if(!p.toFile().exists()) {
+					System.err.println("Error. " + args[0] + " Does not exist");
+					System.exit(0);
+				} else if(!p.toFile().isDirectory()) {
+					System.err.println("Error. " + args[0] + " Is not a directory");
+					System.exit(0);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.err.println("Error. use java -jar Slideshow.jar <path> <delay>");
@@ -65,6 +74,9 @@ public class Slideshow {
 			System.exit(0);
 		}
 
+		JLabel infoLabel = new JLabel("Press ESC to close");
+		infoLabel.setFont(new Font(infoLabel.getFont().getFontName(), Font.PLAIN, 30));
+
 		fileTypes.clear();
 		for (String ext : ImageIO.getReaderFormatNames()) {
 			fileTypes.add(ext);
@@ -74,6 +86,8 @@ public class Slideshow {
 
 		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice vc = env.getDefaultScreenDevice();
+
+		imgP.add(infoLabel);
 
 		frame.setUndecorated(true);
 		frame.setVisible(true);
@@ -101,10 +115,19 @@ public class Slideshow {
 		});
 
 		vc.setFullScreenWindow(frame);
-		
+
 		nextTimer.start();
 		updateTimer.start();
 		nextImage();
+
+		Timer removeInfoTimer = new Timer(5000, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				imgP.remove(infoLabel);
+			}
+		});
+		removeInfoTimer.setRepeats(false);
+		removeInfoTimer.start();
 	}
 
 	public void nextImage() {
